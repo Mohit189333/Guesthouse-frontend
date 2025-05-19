@@ -1,0 +1,237 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import '../css/Profile.css';
+import Layout from '../components/Layout';
+
+const AdminProfile = () => {
+  const [admin, setAdmin] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [users, setUsers] = useState([]);
+  const [message, setMessage] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [showUsers, setShowUsers] = useState(false);
+  const navigate = useNavigate();
+  const token = localStorage.getItem('jwtToken');
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    fetchAdminProfile();
+  }, []);
+
+  const fetchAdminProfile = async () => {
+    try {
+      const response = await axios.get('http://localhost:5050/api/users/me', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setAdmin({
+        ...response.data,
+        password: '',
+        confirmPassword: ''
+      });
+    } catch (error) {
+      console.error('Error fetching admin profile:', error);
+      setMessage('Failed to fetch admin profile');
+    }
+  };
+
+  const fetchAllUsers = async () => {
+    try {
+      const response = await axios.get('http://localhost:5050/api/users', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setMessage('Failed to fetch users');
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setAdmin(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (admin.password && admin.password !== admin.confirmPassword) {
+      setMessage('Passwords do not match');
+      return;
+    }
+
+    try {
+      const updateData = {
+        username: admin.username,
+        email: admin.email,
+        ...(admin.password && { password: admin.password })
+      };
+
+      await axios.put('http://localhost:5050/api/users/me', updateData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setMessage('Profile updated successfully!');
+      setIsEditing(false);
+      fetchAdminProfile();
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setMessage(error.response?.data?.message || 'Failed to update profile');
+    }
+  };
+
+  const deleteUser = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        await axios.delete(`http://localhost:5050/api/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setMessage('User deleted successfully');
+        fetchAllUsers();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        setMessage('Failed to delete user');
+      }
+    }
+  };
+
+  return (
+    <Layout>
+    <div className="profile-container">
+      <h2>Admin Profile</h2>
+      {message && <div className="alert">{message}</div>}
+
+      <div className="admin-content">
+        <div className="admin-profile-section">
+          {!isEditing ? (
+            <div className="profile-view">
+              <div className="profile-field">
+                <label>Username:</label>
+                <p>{admin.username}</p>
+              </div>
+              <div className="profile-field">
+                <label>Email:</label>
+                <p>{admin.email}</p>
+              </div>
+              <button onClick={() => setIsEditing(true)}>Edit Profile</button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="profile-form">
+              <div className="form-group">
+                <label>Username:</label>
+                <input
+                  type="text"
+                  name="username"
+                  value={admin.username}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Email:</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={admin.email}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>New Password (leave blank to keep current):</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={admin.password}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-group">
+                <label>Confirm Password:</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={admin.confirmPassword}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="form-actions">
+                <button type="submit">Save Changes</button>
+                <button type="button" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        <div className="admin-users-section">
+          <button 
+            onClick={() => {
+              setShowUsers(!showUsers);
+              if (!showUsers) fetchAllUsers();
+            }}
+          >
+            {showUsers ? 'Hide Users' : 'Manage Users'}
+          </button>
+
+          {showUsers && (
+            <div className="users-list">
+              <h3>User Management</h3>
+              {users.length === 0 ? (
+                <p>No users found</p>
+              ) : (
+                <table className="users-table">
+                  <thead>
+                    <tr>
+                      <th>Username</th>
+                      <th>Email</th>
+                      <th>Role</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map(user => (
+                      <tr key={user.id}>
+                        <td>{user.username}</td>
+                        <td>{user.email}</td>
+                        <td>{user.roles?.[0] || 'USER'}</td>
+                        <td>
+                          <button 
+                            className="delete-btn"
+                            onClick={() => deleteUser(user.id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+    </Layout>
+  );
+};
+
+export default AdminProfile;

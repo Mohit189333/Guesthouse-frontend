@@ -1,0 +1,189 @@
+/* Navbar.css */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1a1a1a; /* Darker black for more sophistication */
+  color: #fff;
+  padding: 1rem 2.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 1️⃣ FULL‑WIDTH TOP BAR */
+.navbar {
+  width: 100vw;        /* take the whole viewport width  */
+  left: 0;             /* make sure we start at the left edge */
+  right: 0;
+}
+
+
+.navbar-brand {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.navbar-brand:hover {
+  color: #4dabf7; /* Brighter blue for better visibility */
+}
+
+/* Optional: Add a logo before the brand text */
+.navbar-brand::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-color: #4dabf7;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>') no-repeat center;
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>') no-repeat center;
+}
+
+.navbar-links {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links li {
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.navbar-links li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  letter-spacing: 0.3px;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navbar-links li a:hover {
+  color: #4dabf7;
+}
+
+/* Animated underline effect */
+.navbar-links li a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #4dabf7;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.navbar-links li a:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* Active link styling */
+.navbar-links li a.active {
+  color: #4dabf7;
+  font-weight: 600;
+}
+
+.navbar-links li a.active::after {
+  width: 100%;
+}
+
+/* Logout button styling */
+.navbar-links li:last-child a {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.navbar-links li:last-child a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #ff6b6b;
+}
+
+.navbar-links li:last-child a::after {
+  display: none;
+}
+
+/* Mobile menu button (hidden by default) */
+.mobile-menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+  .navbar {
+    padding: 1rem 1.5rem;
+  }
+  
+  .navbar-links {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: row;
+    padding: 1rem;
+  }
+  
+  .mobile-menu-btn {
+    display: block;
+  }
+  
+  .navbar-links {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background-color: #1a1a1a;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 0;
+    gap: 1.5rem;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-150%);
+    transition: transform 0.3s ease;
+    z-index: 999;
+  }
+  
+  .navbar-links.active {
+    transform: translateY(0);
+  }
+  
+  .navbar-links li {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .navbar-links li a {
+    justify-content: center;
+    padding: 0.75rem;
+  }
+  
+  .navbar-links li:last-child a {
+    background-color: transparent;
+    padding: 0.75rem;
+  }
+}
