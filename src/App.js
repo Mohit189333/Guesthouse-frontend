@@ -14,6 +14,8 @@ import BookRoom from "./pages/BookRoom";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import MyBookings from "./pages/MyBookings";
 import ManageBookings from "./pages/ManageBookings";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   const PrivateRoute = ({ children }) => {
@@ -42,17 +44,27 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Register />} />
+        <Route path="/Register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        
         <Route
-          path="/dashboard"
+          path="/"
+          element={
+            
+<PrivateRoute>
+              <Dashboard />
+              </PrivateRoute>
+          }
+        />
+        <Route 
+          path="/dashboard" 
           element={
             <PrivateRoute>
-
-              <Dashboard />
-              {/* <Footer /> */}
+            
+                <Dashboard />
+            
             </PrivateRoute>
-          }
+          } 
         />
         <Route path="/all-rooms" element={<AllRooms />} />
         <Route path="/manage-rooms" element={<ManageRooms />} />
@@ -72,6 +84,9 @@ function App() {
         />        
         <Route path="/booking-confirmation" element={<BookingConfirmation />} />
         <Route path="/my-bookings" element={<MyBookings />} />
+
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+    <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         // In your router configuration
         <Route 

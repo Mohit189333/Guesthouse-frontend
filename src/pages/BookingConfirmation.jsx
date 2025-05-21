@@ -63,7 +63,7 @@ function BookingConfirmation() {
             </button>
             <button 
               className="home-btn"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/dashboard")}
             >
               Back to Home
             </button>

@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import AuthForm from "../components/AuthForm";
-import "../css/Auth.css"; // Import shared styles
+import "../css/Auth.css";
+import { registerSchema } from "../validation/authSchema"; // <-- Import Zod schema
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -23,6 +24,14 @@ function Register() {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+
+    // Zod validation
+    const result = registerSchema.safeParse(formData);
+    if (!result.success) {
+      setLoading(false);
+      setMessage(result.error.errors[0].message);
+      return;
+    }
 
     try {
       const response = await axios.post(`http://localhost:5050/api/auth/register?role=${formData.role}`, {

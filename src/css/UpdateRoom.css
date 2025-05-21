@@ -147,7 +147,11 @@
   border-top: 1px solid #eee;
 }
 
-.update-button {
+.update-button,
+.delete-button {
+  flex: 1;
+  min-width: 120px;
+  max-width: 200px;
   background-color: #3498db;
   color: white;
   border: none;
@@ -157,24 +161,19 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-align: center;
 }
 
+.update-button {
+  background-color: #3498db;
+}
 .update-button:hover {
   background-color: #2980b9;
 }
 
 .delete-button {
   background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.8rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
 }
-
 .delete-button:hover {
   background-color: #c0392b;
 }
@@ -204,6 +203,7 @@
 }
 
 /* Responsive Design */
+/* Responsive Design */
 @media (max-width: 768px) {
   .update-room-page {
     padding: 1rem;
@@ -215,10 +215,13 @@
   
   .form-actions {
     flex-direction: column;
+    align-items: stretch;
   }
   
   .update-button,
   .delete-button {
     width: 100%;
+    max-width: 100%;
+    margin-bottom: 0.5rem;
   }
 }

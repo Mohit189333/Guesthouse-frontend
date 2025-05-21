@@ -45,7 +45,7 @@ function Navbar() {
                 to="/manage-rooms" 
                 className={({ isActive }) => isActive ? "active" : ""}
               >
-                Manage Rooms
+                Rooms
               </NavLink>
             </li>
             <li>
@@ -53,7 +53,7 @@ function Navbar() {
                 to="/manage-beds" 
                 className={({ isActive }) => isActive ? "active" : ""}
               >
-                Manage Beds
+                Beds
               </NavLink>
             </li>
             <li>
@@ -61,7 +61,7 @@ function Navbar() {
                 to="/manage-bookings" 
                 className={({ isActive }) => isActive ? "active" : ""}
               >
-                Manage Bookings
+                Bookings
               </NavLink>
             </li>
             <li>
@@ -69,7 +69,7 @@ function Navbar() {
                 to="/admin-profile" 
                 className={({ isActive }) => isActive ? "active" : ""}
               >
-                Admin Profile
+                Admin
               </NavLink>
             </li>
           </>
@@ -89,7 +89,7 @@ function Navbar() {
                 to="/all-rooms" 
                 className={({ isActive }) => isActive ? "active" : ""}
               >
-                Available Rooms
+                Rooms
               </NavLink>
             </li>
             <li>
@@ -97,7 +97,7 @@ function Navbar() {
                 to="/my-bookings" 
                 className={({ isActive }) => isActive ? "active" : ""}
               >
-                My Bookings
+                Bookings
               </NavLink>
             </li>
             <li>
@@ -105,7 +105,7 @@ function Navbar() {
                 to="/user-profile" 
                 className={({ isActive }) => isActive ? "active" : ""}
               >
-                My Profile
+                Profile
               </NavLink>
             </li>
           </>

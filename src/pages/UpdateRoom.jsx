@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Layout from "../components/Layout";
 import "../css/UpdateRoom.css";
+import { ToastContainer, toast } from 'react-toastify';
 
 function UpdateRoom() {
   const { id } = useParams();
@@ -59,28 +60,34 @@ function UpdateRoom() {
     }
   };
 
-  const handleUpdateRoom = async (e) => {
-    e.preventDefault();
-    try {
-      const formData = new FormData();
-      formData.append("room", JSON.stringify(room));
-      if (imageFile) {
-        formData.append("file", imageFile);
-      }
+const handleUpdateRoom = async (e) => {
+  e.preventDefault();
+  try {
+    const formData = new FormData();
+    formData.append("name", room.name);
+    formData.append("description", room.description);
+    formData.append("pricePerNight", parseFloat(room.pricePerNight));
+    formData.append("isAvailable", room.isAvailable);
+    formData.append("amenities", room.amenities); // comma separated string
+    formData.append("roomType", room.roomType.toUpperCase()); // match backend enum
 
-      await axios.put(`http://localhost:5050/api/rooms/update/${id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      showMessage("Room updated successfully!", "success");
-      setTimeout(() => navigate("/manage-rooms"), 2000);
-    } catch (error) {
-      showMessage("Failed to update room. Please try again.", "error");
+    if (imageFile) {
+      formData.append("file", imageFile);
     }
-  };
+
+    await axios.put(`http://localhost:5050/api/rooms/update/${id}`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    toast.success("Room updated successfully!", "success");
+    setTimeout(() => navigate("/manage-rooms"), 2000);
+  } catch (error) {
+    toast.error("Failed to update room. Please try again.", "error");
+  }
+};
 
   const handleDeleteRoom = async () => {
     if (window.confirm("Are you sure you want to delete this room?")) {
@@ -88,10 +95,10 @@ function UpdateRoom() {
         await axios.delete(`http://localhost:5050/api/rooms/delete/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        showMessage("Room deleted successfully!", "success");
+        toast.success("Room deleted successfully!", "success");
         setTimeout(() => navigate("/manage-rooms"), 2000);
       } catch (error) {
-        showMessage("Failed to delete room. Please try again.", "error");
+        toast.error("Failed to delete room. Please try again.", "error");
       }
     }
   };
@@ -110,6 +117,17 @@ function UpdateRoom() {
   return (
     <Layout>
       <div className="update-room-page">
+        <ToastContainer 
+                  position="bottom-right"
+                  autoClose={5000}
+                  hideProgressBar={false}
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                />
         <div className="page-header">
           <h1>Update Room</h1>
           <p>Edit the details of this room</p>
@@ -145,8 +163,8 @@ function UpdateRoom() {
                   required
                 >
                   <option value="">Select Type</option>
-                  <option value="Single">Single</option>
-                  <option value="Double">Double</option>
+                  <option value="Standard">Standard</option>
+                  <option value="Family">Family</option>
                   <option value="Suite">Suite</option>
                   <option value="Deluxe">Deluxe</option>
                 </select>

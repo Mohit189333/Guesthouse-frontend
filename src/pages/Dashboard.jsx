@@ -3,18 +3,21 @@ import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import "../css/Dashboard.css";
 import Layout from "../components/Layout";
-import { FiCalendar, FiHome, FiBookmark, FiDollarSign, FiClock, FiPlusCircle } from "react-icons/fi";
+import { FiCalendar, FiHome, FiBookmark, FiDollarSign, FiClock, FiPlusCircle, FiSearch } from "react-icons/fi";
+import RoomCard from "../components/RoomCard"; // You'll need to create this component
 
 function Dashboard() {
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
   const [checkInDate, setCheckInDate] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
+  const [availableRooms, setAvailableRooms] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
     if (!token) {
-      navigate("/login");
+      // navigate("/login");
       return;
     }
 
@@ -25,7 +28,7 @@ function Dashboard() {
     } catch (error) {
       console.error("Invalid token");
       localStorage.removeItem("jwtToken");
-      navigate("/login");
+      // navigate("/login");
     }
   }, [navigate]);
 
@@ -35,6 +38,46 @@ function Dashboard() {
       setCheckInDate(value);
     } else if (name === "checkOut") {
       setCheckOutDate(value);
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!checkInDate || !checkOutDate) {
+      alert("Please select both check-in and check-out dates");
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      // Replace with actual API call to fetch available rooms
+      // const response = await axios.get(`/api/rooms/available?checkIn=${checkInDate}&checkOut=${checkOutDate}`);
+      // setAvailableRooms(response.data);
+      
+      // Mock data for demonstration
+      const mockRooms = [
+        {
+          id: 1,
+          name: "Deluxe Room",
+          description: "Spacious room with king-size bed and city view",
+          pricePerNight: 150,
+          imageUrl: "https://example.com/room1.jpg",
+          amenities: ["WiFi", "AC", "TV", "Minibar"]
+        },
+        {
+          id: 2,
+          name: "Standard Room",
+          description: "Comfortable room with queen-size bed",
+          pricePerNight: 100,
+          imageUrl: "https://example.com/room2.jpg",
+          amenities: ["WiFi", "AC"]
+        }
+      ];
+      setAvailableRooms(mockRooms);
+    } catch (error) {
+      console.error("Error fetching available rooms:", error);
+      alert("Failed to fetch available rooms");
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -57,7 +100,7 @@ function Dashboard() {
             <FiCalendar className="date-icon" />
             <h3>Plan Your Stay</h3>
           </div>
-          <form className="date-form">
+          <form className="date-form" onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
             <div className="form-field">
               <label htmlFor="checkIn">Check-in Date</label>
               <input
@@ -80,8 +123,48 @@ function Dashboard() {
                 required
               />
             </div>
+            <button 
+              type="submit" 
+              className="search-button"
+              disabled={isSearching}
+            >
+              <FiSearch className="button-icon" />
+              {isSearching ? "Searching..." : "Search Rooms"}
+            </button>
           </form>
         </div>
+
+        {/* Available Rooms Section */}
+        {availableRooms.length > 0 && (
+          <div className="available-rooms-section">
+            <h2 className="section-title">Available Rooms</h2>
+            <div className="rooms-grid">
+              {availableRooms.slice(0, 3).map(room => (
+                <RoomCard 
+                  key={room.id}
+                  room={room}
+                  checkInDate={checkInDate}
+                  checkOutDate={checkOutDate}
+                />
+              ))}
+            </div>
+            {availableRooms.length > 3 && (
+              <div className="view-more-container">
+                <button 
+                  className="view-more-button"
+                  onClick={() => navigate("/all-rooms", { 
+                    state: { 
+                      checkInDate, 
+                      checkOutDate 
+                    } 
+                  })}
+                >
+                  View More Rooms
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="dashboard-content">
           {role === "ADMIN" ? (

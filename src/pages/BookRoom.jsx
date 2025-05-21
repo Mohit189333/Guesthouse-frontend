@@ -5,7 +5,7 @@ import Layout from "../components/Layout";
 import "../css/BookRoom.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import Loader from "../components/Loader";
 function BookRoom() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -249,7 +249,7 @@ function BookRoom() {
                 className="submit-button"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Processing..." : "Confirm Booking"}
+                {isSubmitting ? <Loader /> : "Confirm Booking"}
               </button>
             </div>
 

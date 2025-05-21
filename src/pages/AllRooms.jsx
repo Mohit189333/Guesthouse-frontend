@@ -84,8 +84,8 @@ function AllRooms() {
             <div className="filter-dropdown">
               <select value={filter} onChange={(e) => setFilter(e.target.value)}>
                 <option value="all">All Room Types</option>
-                <option value="Single">Single</option>
-                <option value="Double">Double</option>
+                <option value="Standard">Standard</option>
+                <option value="Family">Family</option>
                 <option value="Suite">Suite</option>
                 <option value="Deluxe">Deluxe</option>
               </select>
@@ -134,7 +134,7 @@ function AllRooms() {
                       : room.description}
                   </p>
                   
-                  <div className="room-features">
+                  {/* <div className="room-features">
                     <div className="feature">
                       <span className="feature-icon">🛏️</span>
                       <span>{room.bedCount} {room.bedCount > 1 ? 'Beds' : 'Bed'}</span>
@@ -143,12 +143,12 @@ function AllRooms() {
                       <span className="feature-icon">👥</span>
                       <span>Max {room.maxOccupancy} {room.maxOccupancy > 1 ? 'Guests' : 'Guest'}</span>
                     </div>
-                  </div>
+                  </div> */}
                   
                   <div className="room-footer">
                     <div className="price">
                       <span className="price-amount">${room.pricePerNight}</span>
-                      {/* <span className="price-label">/ night</span> */}
+                      <span className="price-label">/ night</span>
                     </div>
                     <button 
                       className="view-details-button"

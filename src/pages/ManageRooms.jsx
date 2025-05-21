@@ -52,52 +52,44 @@ function ManageRooms() {
     }));
   };
 
-  const handleAddRoom = async (e) => {
-    e.preventDefault();
+const handleAddRoom = async (e) => {
+  e.preventDefault();
 
-    try {
-      const token = localStorage.getItem("jwtToken");
+  try {
+    const token = localStorage.getItem("jwtToken");
 
-      // Convert amenities string to array
-      const amenitiesArray = newRoom.amenities
-        .split(',')
-        .map(a => a.trim())
-        .filter(a => a.length > 0);
+    const formData = new FormData();
+    formData.append("name", newRoom.name);
+    formData.append("description", newRoom.description);
+    formData.append("pricePerNight", parseFloat(newRoom.pricePerNight));
+    formData.append("isAvailable", newRoom.isAvailable);
+    formData.append("amenities", newRoom.amenities); // comma-separated string, as entered in the form
+    formData.append("roomType", newRoom.roomType.toUpperCase()); // backend expects enum e.g. DELUXE
 
-      const formData = new FormData();
-      formData.append("room", JSON.stringify({
-        name: newRoom.name,
-        description: newRoom.description,
-        pricePerNight: parseFloat(newRoom.pricePerNight),
-        amenities: amenitiesArray, // send as array
-        roomType: newRoom.roomType,
-        isAvailable: newRoom.isAvailable
-      }));
-
-      if (imageFile) {
-        formData.append("file", imageFile);
-      }
-
-      const response = await axios.post("http://localhost:5050/api/rooms/add", formData, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "multipart/form-data"
-        }
-      });
-
-      showMessage("Room added successfully!", "success");
-      resetForm();
-      fetchRooms();
-    } catch (error) {
-      console.error("Full error details:", error);
-      console.error("Error response:", error.response?.data);
-      showMessage(
-        error.response?.data?.message || 
-        "Error adding room. Please check console for details.", 
-        "error"
-      );
+    if (imageFile) {
+      formData.append("file", imageFile);
     }
-  };
+
+    const response = await axios.post("http://localhost:5050/api/rooms/add", formData, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "multipart/form-data"
+      }
+    });
+
+    showMessage("Room added successfully!", "success");
+    resetForm();
+    fetchRooms();
+  } catch (error) {
+    console.error("Full error details:", error);
+    console.error("Error response:", error.response?.data);
+    showMessage(
+      error.response?.data?.message || 
+      "Error adding room. Please check console for details.", 
+      "error"
+    );
+  }
+};
 
   const resetForm = () => {
     setNewRoom({
@@ -163,8 +155,8 @@ function ManageRooms() {
                         required
                       >
                         <option value="">Select Type</option>
-                        <option value="Single">Single</option>
-                        <option value="Double">Double</option>
+                        <option value="Standard">Standard</option>
+                        <option value="Family">Family</option>
                         <option value="Suite">Suite</option>
                         <option value="Deluxe">Deluxe</option>
                       </select>
