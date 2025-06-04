@@ -48,14 +48,14 @@ function Navbar() {
                 Rooms
               </NavLink>
             </li>
-            <li>
+            {/* <li>
               <NavLink 
                 to="/manage-beds" 
                 className={({ isActive }) => isActive ? "active" : ""}
               >
                 Beds
               </NavLink>
-            </li>
+            </li> */}
             <li>
               <NavLink 
                 to="/manage-bookings" 

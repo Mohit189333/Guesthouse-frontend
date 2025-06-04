@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Layout from "../components/Layout";
-import "../css/MyBookings.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { FiCalendar, FiFilter, FiX, FiArrowRight, FiInfo } from "react-icons/fi";
+import "../css/MyBookings.css";
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
@@ -13,6 +14,7 @@ function MyBookings() {
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [dateRange, setDateRange] = useState([null, null]);
   const [startDate, endDate] = dateRange;
+  const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -62,55 +64,54 @@ function MyBookings() {
     return true;
   });
 
-const handleCancelBooking = async (bookingId) => {
-  if (!window.confirm("Are you sure you want to cancel this booking?")) return;
+  const handleCancelBooking = async (bookingId) => {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) return;
 
-  try {
-    const token = localStorage.getItem("token");
-    await axios.delete(`http://localhost:5050/api/bookings/${bookingId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    try {
+      const token = localStorage.getItem("jwtToken");
+      await axios.delete(`http://localhost:5050/api/bookings/${bookingId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
 
-    // Update local state optimistically
-    setBookings(bookings.map(b => 
-      b.id === bookingId ? {...b, status: "CANCELLED"} : b
-    ));
-    
-    // Show success message
-    alert("Booking cancelled successfully!");
-  } catch (err) {
-    console.error("Cancel booking error:", err);
-    
-    // Handle specific error cases
-    const errorMessage = err.response?.data?.message || 
-      (err.response?.status === 403 
-        ? "You can only cancel your own bookings" 
-        : "Failed to cancel booking. Please try again.");
-    
-    alert(errorMessage);
-    
-    // Refresh data if there was an error
-    // if (err.response?.status !== 403) {
-    //   fetchBookings();
-    // }
-  }
-};
+      // Update local state optimistically
+      setBookings(bookings.map(b => 
+        b.id === bookingId ? {...b, status: "CANCELLED"} : b
+      ));
+      
+      // Show success message
+      alert("Booking cancelled successfully!");
+    } catch (err) {
+      console.error("Cancel booking error:", err);
+      
+      const errorMessage = err.response?.data?.message || 
+        (err.response?.status === 403 
+          ? "You can only cancel your own bookings" 
+          : "Failed to cancel booking. Please try again.");
+      
+      alert(errorMessage);
+    }
+  };
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case "APPROVED":
-        return "status-badge approved";
+        return "status-badge status-approved";
       case "PENDING":
-        return "status-badge pending";
+        return "status-badge status-pending";
       case "REJECTED":
-        return "status-badge rejected";
+        return "status-badge status-rejected";
       case "CANCELLED":
-        return "status-badge cancelled";
+        return "status-badge status-cancelled";
       default:
         return "status-badge";
     }
+  };
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   if (loading) {
@@ -145,48 +146,66 @@ const handleCancelBooking = async (bookingId) => {
   return (
     <Layout>
       <div className="my-bookings-container">
-        <h1>My Bookings</h1>
-        
-        <div className="booking-filters">
-          <div className="filter-group">
-            <label>Filter by Status:</label>
-            <select 
-              value={filterStatus} 
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="status-filter"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="PENDING">Pending</option>
-              <option value="APPROVED">Approved</option>
-              <option value="REJECTED">Rejected</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
-          </div>
-          
-          <div className="filter-group">
-            <label>Filter by Date Range:</label>
-            <DatePicker
-              selectsRange={true}
-              startDate={startDate}
-              endDate={endDate}
-              onChange={(update) => setDateRange(update)}
-              placeholderText="Select date range"
-              className="date-range-picker"
-            />
-            {startDate && (
-              <button 
-                onClick={() => setDateRange([null, null])}
-                className="clear-date-btn"
-              >
-                Clear
-              </button>
-            )}
-          </div>
+        <div className="bookings-header">
+          <h1>My Bookings</h1>
+          <button 
+            onClick={() => setShowFilters(!showFilters)}
+            className="filter-toggle-btn"
+          >
+            <FiFilter /> {showFilters ? 'Hide Filters' : 'Show Filters'}
+          </button>
         </div>
+        
+        {showFilters && (
+          <div className="booking-filters">
+            <div className="filter-group">
+              <label>Status</label>
+              <select 
+                value={filterStatus} 
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="status-filter"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="PENDING">Pending</option>
+                <option value="APPROVED">Approved</option>
+                <option value="REJECTED">Rejected</option>
+                <option value="CANCELLED">Cancelled</option>
+              </select>
+            </div>
+            
+            <div className="filter-group">
+              <label>Date Range</label>
+              <div className="date-picker-wrapper">
+                <DatePicker
+                  selectsRange={true}
+                  startDate={startDate}
+                  endDate={endDate}
+                  onChange={(update) => setDateRange(update)}
+                  placeholderText="Select date range"
+                  className="date-range-picker"
+                  calendarClassName="booking-calendar"
+                />
+                {/* <FiCalendar className="calendar-icon" /> */}
+                {startDate && (
+                  <button 
+                    onClick={() => setDateRange([null, null])}
+                    className="clear-date-btn"
+                  >
+                    <FiX />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {filteredBookings.length === 0 ? (
           <div className="no-bookings">
-            <p>No bookings found matching your criteria.</p>
+            <div className="no-bookings-icon">
+              <FiInfo size={48} />
+            </div>
+            <h3>No bookings found</h3>
+            <p>No bookings match your current filter criteria.</p>
             <button 
               onClick={() => {
                 setFilterStatus("ALL");
@@ -194,7 +213,7 @@ const handleCancelBooking = async (bookingId) => {
               }}
               className="reset-filters-btn"
             >
-              Reset Filters
+              Reset All Filters
             </button>
           </div>
         ) : (
@@ -211,22 +230,23 @@ const handleCancelBooking = async (bookingId) => {
                 <div className="booking-details">
                   <div className="detail-row">
                     <span className="detail-label">Room:</span>
-                    <span className="detail-value">{booking.room?.name || 'N/A'}</span>
+                    <span className="detail-value">{booking.roomName || 'N/A'}</span>
                   </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Check-in:</span>
-                    <span className="detail-value">
-                      {new Date(booking.checkInDate).toLocaleDateString()}
-                    </span>
+                  
+                  <div className="date-range">
+                    <div className="date-item">
+                      <span className="date-label">Check-in</span>
+                      <span className="date-value">{formatDate(booking.checkInDate)}</span>
+                    </div>
+                    <FiArrowRight className="date-arrow" />
+                    <div className="date-item">
+                      <span className="date-label">Check-out</span>
+                      <span className="date-value">{formatDate(booking.checkOutDate)}</span>
+                    </div>
                   </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Check-out:</span>
-                    <span className="detail-value">
-                      {new Date(booking.checkOutDate).toLocaleDateString()}
-                    </span>
-                  </div>
+                  
                   {booking.rejectionReason && (
-                    <div className="detail-row">
+                    <div className="detail-row rejection-reason">
                       <span className="detail-label">Rejection Reason:</span>
                       <span className="detail-value">{booking.rejectionReason}</span>
                     </div>
@@ -243,10 +263,10 @@ const handleCancelBooking = async (bookingId) => {
                     </button>
                   )}
                   <button 
-                    onClick={() => navigate(`/room-details/${booking.room?.id}`)}
+                    onClick={() => navigate(`/room-details/${booking.roomId}`)}
                     className="view-room-btn"
                   >
-                    View Room
+                    View Room Details
                   </button>
                 </div>
               </div>

@@ -293,3 +293,53 @@
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 }
+
+
+/* Add to RoomDetails.css */
+.bed-selection {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.bed-selection label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.bed-selection select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  background-color: white;
+}
+
+.selected-beds-info {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #e9f7ef;
+  border-radius: 4px;
+  border-left: 4px solid #28a745;
+}
+
+.selected-beds-info p {
+  margin: 0 0 5px 0;
+  font-weight: 500;
+}
+
+.selected-beds-info ul {
+  margin: 5px 0 0 20px;
+  padding: 0;
+}
+
+.selected-beds-info li {
+  list-style-type: disc;
+  color: #555;
+}

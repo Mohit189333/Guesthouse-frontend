@@ -10,14 +10,28 @@ function UpdateRoom() {
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [guestHouses, setGuestHouses] = useState([]);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const token = localStorage.getItem("jwtToken");
 
   useEffect(() => {
+    fetchGuestHouses();
     fetchRoomDetails();
+    // eslint-disable-next-line
   }, []);
+
+  const fetchGuestHouses = async () => {
+    try {
+      const response = await axios.get("http://localhost:5050/api/guest-houses", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setGuestHouses(response.data);
+    } catch (error) {
+      toast.error("Failed to load guest houses");
+    }
+  };
 
   const fetchRoomDetails = async () => {
     try {
@@ -48,6 +62,13 @@ function UpdateRoom() {
     }));
   };
 
+  const handleGuestHouseChange = (e) => {
+    setRoom((prevRoom) => ({
+      ...prevRoom,
+      guestHouseId: e.target.value
+    }));
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -60,34 +81,41 @@ function UpdateRoom() {
     }
   };
 
-const handleUpdateRoom = async (e) => {
-  e.preventDefault();
-  try {
-    const formData = new FormData();
-    formData.append("name", room.name);
-    formData.append("description", room.description);
-    formData.append("pricePerNight", parseFloat(room.pricePerNight));
-    formData.append("isAvailable", room.isAvailable);
-    formData.append("amenities", room.amenities); // comma separated string
-    formData.append("roomType", room.roomType.toUpperCase()); // match backend enum
+  const handleUpdateRoom = async (e) => {
+    e.preventDefault();
+    try {
+      const formData = new FormData();
+      formData.append("name", room.name);
+      formData.append("description", room.description);
+      formData.append("pricePerNight", parseFloat(room.pricePerNight));
+      formData.append("isAvailable", room.isAvailable);
+      formData.append("amenities", room.amenities);
+      formData.append("roomType", room.roomType.toUpperCase());
+      formData.append("bedCount", room.bedCount);
 
-    if (imageFile) {
-      formData.append("file", imageFile);
+      // Include guest house ID (for moving the room to a different guest house)
+      if (room.guestHouseId) {
+        formData.append("guestHouseId", room.guestHouseId);
+      }
+
+      if (imageFile) {
+        formData.append("file", imageFile);
+      }
+
+      await axios.put(`http://localhost:5050/api/rooms/update/${id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast.success("Room updated successfully!");
+      setTimeout(() => navigate("/manage-rooms"), 2000);
+    } catch (error) {
+      console.error("Update error:", error);
+      toast.error(error.response?.data?.message || "Failed to update room. Please try again.");
     }
-
-    await axios.put(`http://localhost:5050/api/rooms/update/${id}`, formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
-    toast.success("Room updated successfully!", "success");
-    setTimeout(() => navigate("/manage-rooms"), 2000);
-  } catch (error) {
-    toast.error("Failed to update room. Please try again.", "error");
-  }
-};
+  };
 
   const handleDeleteRoom = async () => {
     if (window.confirm("Are you sure you want to delete this room?")) {
@@ -95,15 +123,15 @@ const handleUpdateRoom = async (e) => {
         await axios.delete(`http://localhost:5050/api/rooms/delete/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        toast.success("Room deleted successfully!", "success");
+        toast.success("Room deleted successfully!");
         setTimeout(() => navigate("/manage-rooms"), 2000);
       } catch (error) {
-        toast.error("Failed to delete room. Please try again.", "error");
+        toast.error("Failed to delete room. Please try again.");
       }
     }
   };
 
-  if (loading) {
+  if (loading || !room) {
     return (
       <Layout>
         <div className="loading-container">
@@ -117,17 +145,17 @@ const handleUpdateRoom = async (e) => {
   return (
     <Layout>
       <div className="update-room-page">
-        <ToastContainer 
-                  position="bottom-right"
-                  autoClose={5000}
-                  hideProgressBar={false}
-                  newestOnTop={false}
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss
-                  draggable
-                  pauseOnHover
-                />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
         <div className="page-header">
           <h1>Update Room</h1>
           <p>Edit the details of this room</p>
@@ -142,6 +170,25 @@ const handleUpdateRoom = async (e) => {
         <div className="form-container">
           <form onSubmit={handleUpdateRoom}>
             <div className="form-grid">
+              {/* Guest House selection */}
+              <div className="form-group">
+                <label>Guest House</label>
+                <select
+                  name="guestHouseId"
+                  value={room.guestHouseId || ""}
+                  onChange={handleGuestHouseChange}
+                  required
+                >
+                  <option value="">Select Guest House</option>
+                  {guestHouses.map((gh) => (
+                    <option key={gh.id} value={gh.id}>
+                      {gh.location} – {gh.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Room Name */}
               <div className="form-group">
                 <label>Room Name</label>
                 <input
@@ -153,7 +200,8 @@ const handleUpdateRoom = async (e) => {
                   placeholder="Deluxe Suite"
                 />
               </div>
-
+              
+              {/* Room Type */}
               <div className="form-group">
                 <label>Room Type</label>
                 <select
@@ -163,13 +211,14 @@ const handleUpdateRoom = async (e) => {
                   required
                 >
                   <option value="">Select Type</option>
-                  <option value="Standard">Standard</option>
-                  <option value="Family">Family</option>
-                  <option value="Suite">Suite</option>
-                  <option value="Deluxe">Deluxe</option>
+                  <option value="STANDARD">Standard</option>
+                  <option value="FAMILY">Family</option>
+                  <option value="SUITE">Suite</option>
+                  <option value="DELUXE">Deluxe</option>
                 </select>
               </div>
-
+              
+              {/* Price Per Night */}
               <div className="form-group">
                 <label>Price Per Night ($)</label>
                 <input
@@ -179,9 +228,25 @@ const handleUpdateRoom = async (e) => {
                   onChange={handleInputChange}
                   required
                   min="0"
+                  step="0.01"
                 />
               </div>
-
+              
+              {/* Bed Count */}
+              <div className="form-group">
+                <label>Bed Count</label>
+                <input
+                  type="number"
+                  name="bedCount"
+                  value={room.bedCount || 1}
+                  onChange={handleInputChange}
+                  required
+                  min="1"
+                  max="10"
+                />
+              </div>
+              
+              {/* Available */}
               <div className="form-group">
                 <label>Available</label>
                 <select
@@ -198,7 +263,8 @@ const handleUpdateRoom = async (e) => {
                   <option value="false">No</option>
                 </select>
               </div>
-
+              
+              {/* Description */}
               <div className="form-group full-width">
                 <label>Description</label>
                 <textarea
@@ -209,19 +275,21 @@ const handleUpdateRoom = async (e) => {
                   rows="4"
                 />
               </div>
-
+              
+              {/* Amenities */}
               <div className="form-group full-width">
                 <label>Amenities (comma separated)</label>
                 <textarea
                   name="amenities"
-                  value={room.amenities || ""}
+                  value={Array.isArray(room.amenities) ? room.amenities.join(', ') : room.amenities || ""}
                   onChange={handleInputChange}
                   required
                   rows="3"
                   placeholder="WiFi, TV, Air Conditioning, etc."
                 />
               </div>
-
+              
+              {/* Room Image */}
               <div className="form-group full-width">
                 <label>Room Image</label>
                 <div className="image-upload-container">
@@ -243,7 +311,7 @@ const handleUpdateRoom = async (e) => {
                 </div>
               </div>
             </div>
-
+            
             <div className="form-actions">
               <button type="submit" className="update-button">
                 Update Room

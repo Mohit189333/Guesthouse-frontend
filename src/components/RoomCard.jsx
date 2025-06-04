@@ -1,8 +1,9 @@
 // components/RoomCard.js
 import React from "react";
-import { FiStar } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const RoomCard = ({ room, checkInDate, checkOutDate }) => {
+  const navigate = useNavigate();
   return (
     <div className="room-card">
       <div className="room-image-container">
@@ -26,13 +27,11 @@ const RoomCard = ({ room, checkInDate, checkOutDate }) => {
           </div>
           <button 
             className="book-button"
-            onClick={() => {
-              // Navigate to booking page with room and dates
-              // You'll need to implement this navigation
-            }}
+            onClick={() => navigate(`/room-details/${room.id}`)}
           >
-            Book Now
+            View Room
           </button>
+          
         </div>
       </div>
     </div>

@@ -8,7 +8,7 @@ function RoomDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [room, setRoom] = useState(null);
-  const [beds, setBeds] = useState([]); // NEW: store beds
+   // NEW: store beds
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState(0);
@@ -25,18 +25,7 @@ function RoomDetails() {
         setLoading(false);
       }
     };
-
-    const fetchBeds = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5050/api/rooms/${id}/beds`);
-        setBeds(response.data);
-      } catch (err) {
-        setBeds([]); // fallback if error
-      }
-    };
-
     fetchRoomDetails();
-    fetchBeds();
   }, [id]);
 
   const handleBookNow = () => {
@@ -92,8 +81,6 @@ function RoomDetails() {
     : ["/default-room.jpg"];
 
   // ---- NEW: Compute bed count and bed types ----
-  const bedCount = beds.length;
-  const bedTypes = [...new Set(beds.map(bed => bed.bedType))].join(', '); // Unique types, comma separated
 
   return (
     <Layout>
@@ -145,23 +132,6 @@ function RoomDetails() {
             </div>
           </div>
 
-          <div className="room-highlights">
-            <div className="highlight-item">
-              <span className="highlight-icon">🛏️</span>
-              <span>
-                {bedCount} {bedCount === 1 ? 'Bed' : 'Beds'}
-                {bedTypes && ` (${bedTypes})`}
-              </span>
-            </div>
-            <div className="highlight-item">
-              <span className="highlight-icon">👥</span>
-              <span>Max {room.maxOccupancy || 'N/A'} {room.maxOccupancy === 1 ? 'Guest' : 'Guests'}</span>
-            </div>
-            <div className="highlight-item">
-              <span className="highlight-icon">📏</span>
-              <span>{room.size || 'N/A'} sq.ft</span>
-            </div>
-          </div>
 
           <div className="room-description">
             <h3>Description</h3>

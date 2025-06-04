@@ -9,7 +9,7 @@ import UpdateRoom from "./pages/UpdateRoom";
 import RoomDetails from "./pages/RoomDetails";
 import AdminProfile from "./pages/AdminProfile";
 import UserProfile from "./pages/UserProfile";
-import ManageBeds from "./pages/ManageBeds";
+// import ManageBeds from "./pages/ManageBeds";
 import BookRoom from "./pages/BookRoom";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import MyBookings from "./pages/MyBookings";
@@ -72,7 +72,7 @@ function App() {
         <Route path="/room-details/:id" element={<RoomDetails />} />
          <Route path="/admin-profile" element={<AdminProfile />} />
         <Route path="/user-profile" element={<UserProfile />} />
-        <Route path="/manage-beds" element={<ManageBeds />} />
+        {/* <Route path="/manage-beds" element={<ManageBeds />} /> */}
 
         <Route 
           path="/book-room/:id" 
@@ -87,6 +87,7 @@ function App() {
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
     <Route path="/reset-password/:token" element={<ResetPassword />} />
+    <Route path="/reset-password" element={<ResetPassword />} />
 
         // In your router configuration
         <Route 

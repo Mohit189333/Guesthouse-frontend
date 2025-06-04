@@ -3,9 +3,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Layout from "../components/Layout";
 import "../css/ManageRooms.css";
+import { ToastContainer, toast } from 'react-toastify';
+
 
 function ManageRooms() {
   const [rooms, setRooms] = useState([]);
+  const [guestHouses, setGuestHouses] = useState([]);
+  const [selectedGuestHouse, setSelectedGuestHouse] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: "", type: "" });
   const [newRoom, setNewRoom] = useState({
@@ -14,24 +18,57 @@ function ManageRooms() {
     pricePerNight: "",
     amenities: "",
     roomType: "",
-    isAvailable: true
+    isAvailable: true,
+    guestHouseId: "",
+    bedCount: 1
   });
   const [imageFile, setImageFile] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const navigate = useNavigate();
 
+  // Load Guest Houses on mount
   useEffect(() => {
-    fetchRooms();
+    fetchGuestHouses();
   }, []);
 
-  const fetchRooms = async () => {
+  // Fetch rooms when selectedGuestHouse changes
+  useEffect(() => {
+    if (selectedGuestHouse) {
+      fetchRooms(selectedGuestHouse);
+      // Update the newRoom guestHouseId when the main selector changes
+      setNewRoom(prev => ({ ...prev, guestHouseId: selectedGuestHouse }));
+    } else {
+      setRooms([]);
+      setLoading(false);
+    }
+  }, [selectedGuestHouse]);
+
+  const fetchGuestHouses = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5050/api/rooms/available");
+      const res = await axios.get("http://localhost:5050/api/guest-houses");
+      setGuestHouses(res.data);
+      if (res.data.length > 0) {
+        const firstGuestHouseId = res.data[0].id.toString();
+        setSelectedGuestHouse(firstGuestHouseId);
+        setNewRoom(prev => ({ ...prev, guestHouseId: firstGuestHouseId }));
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      toast.error("Error loading guest houses.", "error");
+    }
+  };
+
+  const fetchRooms = async (guestHouseId) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`http://localhost:5050/api/guest-houses/${guestHouseId}/rooms`);
       setRooms(response.data);
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      showMessage("Error fetching rooms. Please try again.", "error");
+      toast.error("Error fetching rooms. Please try again.", "error");
     }
   };
 
@@ -52,44 +89,57 @@ function ManageRooms() {
     }));
   };
 
-const handleAddRoom = async (e) => {
-  e.preventDefault();
+  const handleGuestHouseChange = (e) => {
+    const selectedId = e.target.value;
+    setSelectedGuestHouse(selectedId);
+    // Also update the newRoom guestHouseId when the main selector changes
+    setNewRoom(prev => ({ ...prev, guestHouseId: selectedId }));
+  };
 
-  try {
-    const token = localStorage.getItem("jwtToken");
-
-    const formData = new FormData();
-    formData.append("name", newRoom.name);
-    formData.append("description", newRoom.description);
-    formData.append("pricePerNight", parseFloat(newRoom.pricePerNight));
-    formData.append("isAvailable", newRoom.isAvailable);
-    formData.append("amenities", newRoom.amenities); // comma-separated string, as entered in the form
-    formData.append("roomType", newRoom.roomType.toUpperCase()); // backend expects enum e.g. DELUXE
-
-    if (imageFile) {
-      formData.append("file", imageFile);
+  const handleAddRoom = async (e) => {
+    e.preventDefault();
+    if (!newRoom.guestHouseId) {
+      toast.error("Please select a guest house for this room.", "error");
+      return;
     }
 
-    const response = await axios.post("http://localhost:5050/api/rooms/add", formData, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "multipart/form-data"
-      }
-    });
+    try {
+      const token = localStorage.getItem("jwtToken");
 
-    showMessage("Room added successfully!", "success");
-    resetForm();
-    fetchRooms();
-  } catch (error) {
-    console.error("Full error details:", error);
-    console.error("Error response:", error.response?.data);
-    showMessage(
-      error.response?.data?.message || 
-      "Error adding room. Please check console for details.", 
-      "error"
-    );
-  }
-};
+      const formData = new FormData();
+      formData.append("name", newRoom.name);
+      formData.append("description", newRoom.description);
+      formData.append("pricePerNight", parseFloat(newRoom.pricePerNight));
+      formData.append("isAvailable", newRoom.isAvailable);
+      formData.append("amenities", newRoom.amenities);
+      formData.append("roomType", newRoom.roomType.toUpperCase());
+      formData.append("guestHouseId", newRoom.guestHouseId);
+      formData.append("bedCount", newRoom.bedCount);
+
+      if (imageFile) {
+        formData.append("file", imageFile);
+      }
+
+      await axios.post("http://localhost:5050/api/rooms/add", formData, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      toast.success("Room added successfully!", "success");
+      resetForm();
+      fetchRooms(selectedGuestHouse);
+    } catch (error) {
+      console.error("Full error details:", error);
+      console.error("Error response:", error.response?.data);
+      toast.error(
+        error.response?.data?.message ||
+        "Error adding room. Please check console for details.",
+        "error"
+      );
+    }
+  };
 
   const resetForm = () => {
     setNewRoom({
@@ -98,7 +148,9 @@ const handleAddRoom = async (e) => {
       pricePerNight: "",
       amenities: "",
       roomType: "",
-      isAvailable: true
+      isAvailable: true,
+      guestHouseId: selectedGuestHouse || "",
+      bedCount: 1
     });
     setImageFile(null);
     setIsFormOpen(false);
@@ -107,6 +159,17 @@ const handleAddRoom = async (e) => {
   return (
     <Layout>
       <div className="manage-rooms-page">
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
         <div className="page-header">
           <h1>Room Management</h1>
           <p>Add, edit, and manage your property's rooms</p>
@@ -122,9 +185,28 @@ const handleAddRoom = async (e) => {
           <div className="rooms-section">
             <div className="section-header">
               <h2>Existing Rooms</h2>
-              <button 
+              <div className="guesthouse-dropdown">
+                <label htmlFor="guesthouse-select">Guest House Location:</label>
+                <select
+                  id="guesthouse-select"
+                  value={selectedGuestHouse}
+                  onChange={handleGuestHouseChange}
+                  disabled={guestHouses.length === 0}
+                >
+                  {guestHouses.length === 0 && (
+                    <option value="">No guest houses found</option>
+                  )}
+                  {guestHouses.map((gh) => (
+                    <option key={gh.id} value={gh.id}>
+                      {gh.location} {/*– {gh.name}*/}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
                 className="add-room-toggle"
                 onClick={() => setIsFormOpen(!isFormOpen)}
+                disabled={guestHouses.length === 0}
               >
                 {isFormOpen ? 'Cancel' : '+ Add New Room'}
               </button>
@@ -134,6 +216,22 @@ const handleAddRoom = async (e) => {
               <div className="add-room-section">
                 <form className="add-room-form" onSubmit={handleAddRoom}>
                   <div className="form-grid">
+                    <div className="form-group">
+                      <label>Guest House</label>
+                      <select
+                        name="guestHouseId"
+                        value={newRoom.guestHouseId}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Select Guest House</option>
+                        {guestHouses.map((gh) => (
+                          <option key={gh.id} value={gh.id}>
+                            {gh.location} – {gh.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                     <div className="form-group">
                       <label>Room Name</label>
                       <input
@@ -145,7 +243,6 @@ const handleAddRoom = async (e) => {
                         placeholder="Deluxe Suite"
                       />
                     </div>
-                    
                     <div className="form-group">
                       <label>Room Type</label>
                       <select
@@ -161,7 +258,6 @@ const handleAddRoom = async (e) => {
                         <option value="Deluxe">Deluxe</option>
                       </select>
                     </div>
-                    
                     <div className="form-group">
                       <label>Price Per Night ($)</label>
                       <input
@@ -174,7 +270,18 @@ const handleAddRoom = async (e) => {
                         step="0.01"
                       />
                     </div>
-                    
+                    <div className="form-group">
+                      <label>Bed Count</label>
+                      <input
+                        type="number"
+                        name="bedCount"
+                        value={newRoom.bedCount}
+                        onChange={handleInputChange}
+                        required
+                        min="1"
+                        max="10"
+                      />
+                    </div>
                     <div className="form-group">
                       <label>Available</label>
                       <select
@@ -191,7 +298,6 @@ const handleAddRoom = async (e) => {
                         <option value="false">No</option>
                       </select>
                     </div>
-                    
                     <div className="form-group">
                       <label>Room Image</label>
                       <input
@@ -200,7 +306,6 @@ const handleAddRoom = async (e) => {
                         onChange={(e) => setImageFile(e.target.files[0])}
                       />
                     </div>
-                    
                     <div className="form-group full-width">
                       <label>Description</label>
                       <textarea
@@ -211,7 +316,6 @@ const handleAddRoom = async (e) => {
                         rows="3"
                       />
                     </div>
-                    
                     <div className="form-group full-width">
                       <label>Amenities (comma separated)</label>
                       <textarea
@@ -224,7 +328,6 @@ const handleAddRoom = async (e) => {
                       />
                     </div>
                   </div>
-                  
                   <div className="form-actions">
                     <button type="submit" className="submit-button">
                       Add Room
@@ -241,15 +344,15 @@ const handleAddRoom = async (e) => {
               </div>
             ) : rooms.length === 0 ? (
               <div className="empty-state">
-                <p>No rooms found. Add your first room!</p>
+                <p>No rooms found for this guest house. Add your first room!</p>
               </div>
             ) : (
               <div className="rooms-grid">
                 {rooms.map((room) => (
                   <div className="room-card" key={room.id}>
                     <div className="card-image">
-                      <img 
-                        src={room.imageUrl || "/default-room.jpg"} 
+                      <img
+                        src={room.imageUrl || "/default-room.jpg"}
                         alt={room.name}
                         onError={(e) => {
                           e.target.src = "/default-room.jpg";
@@ -265,6 +368,8 @@ const handleAddRoom = async (e) => {
                           {room.isAvailable ? 'Available' : 'Booked'}
                         </span>
                       </div>
+                      <span>Beds: {room.bedCount}</span>
+
                       <p className="room-description">{room.description}</p>
                       <div className="room-amenities">
                         <strong>Amenities:</strong> {Array.isArray(room.amenities) ? room.amenities.join(', ') : room.amenities}

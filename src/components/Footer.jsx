@@ -23,7 +23,6 @@ function Footer() {
               <>
                 <li><a href="/dashboard">Dashboard</a></li>
                 <li><a href="/manage-rooms">Manage Rooms</a></li>
-                <li><a href="/manage-beds">Manage Beds</a></li>
                 <li><a href="/manage-bookings">Manage Bookings</a></li>
                 <li><a href="/admin-profile">Admin Profile</a></li>
               </>

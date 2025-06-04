@@ -435,3 +435,678 @@
 .view-more-button:hover {
   color: var(--secondary-color);
 }
+
+/* ...previous styles... (keep them) ... */
+
+/* MANAGE GUEST HOUSE SECTION */
+.manage-guesthouse-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(52,152,219,0.09);
+  padding: 2rem 1.5rem;
+  margin: 0 auto 2.5rem auto;
+  max-width: 900px;
+}
+
+.manage-guesthouse-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+}
+
+.manage-gh-icon {
+  color: #3498db;
+  font-size: 2rem;
+}
+
+.guesthouse-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.guesthouse-row {
+  display: flex;
+  flex-wrap: wrap;
+  background: #f7fbfd;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(52,152,219,0.06);
+  padding: 1rem 1rem 1rem 1.2rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.guesthouse-row.editing {
+  background: #eaf6fd;
+}
+
+.gh-info {
+  flex: 3 1 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.gh-name {
+  font-weight: 700;
+  font-size: 1.07rem;
+  color: #2c3e50;
+}
+.gh-location {
+  font-size: 0.99rem;
+  color: #2980b9;
+  font-style: italic;
+}
+.gh-description, .gh-contact {
+  font-size: 0.98rem;
+  color: #7f8c8d;
+}
+
+.gh-actions {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+}
+
+.gh-action-button {
+  background: #eaf6fd;
+  border: 1.5px solid #3498db;
+  color: #217dbb;
+  border-radius: 5px;
+  padding: 0.5rem 0.72rem;
+  font-size: 1.13rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: background 0.15s, color 0.15s;
+}
+.gh-action-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.gh-edit:hover { background: #f1c40f; color: #fff; border-color: #f1c40f; }
+.gh-delete:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
+.gh-save:hover { background: #27ae60; color: #fff; border-color: #27ae60; }
+.gh-cancel:hover { background: #888; color: #fff; border-color: #888; }
+
+.gh-edit-input {
+  min-width: 90px;
+  max-width: 130px;
+  background: #f2f7fa;
+  border: 1px solid #d4e6f1;
+  border-radius: 5px;
+  padding: 0.46rem 0.7rem;
+  font-size: 1rem;
+  margin-right: 0.3rem;
+}
+
+.gh-row-error {
+  color: #e74c3c;
+  font-size: 0.97rem;
+  margin-left: 1.2rem;
+}
+
+.gh-delete-spinner {
+  border: 2px solid #d6eaf8;
+  border-top: 2px solid #e74c3c;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@media (max-width: 900px) {
+  .manage-guesthouse-card {
+    padding: 1.6rem 0.7rem;
+  }
+  .guesthouse-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .gh-info {
+    gap: 0.15rem;
+  }
+}
+@media (max-width: 650px) {
+  .manage-guesthouse-card {
+    padding: 1.15rem 0.3rem;
+  }
+  .guesthouse-row {
+    padding: 0.7rem 0.2rem;
+  }
+  .gh-edit-input {
+    min-width: 80px;
+    max-width: 100px;
+    font-size: 0.95rem;
+    padding: 0.33rem 0.5rem;
+  }
+}
+@media (max-width: 430px) {
+  .manage-guesthouse-card {
+    padding: 0.8rem 0.1rem;
+  }
+  .guesthouse-row {
+    font-size: 0.96rem;
+    padding: 0.4rem 0.05rem;
+    gap: 0.3rem;
+  }
+  .gh-edit-input {
+    font-size: 0.89rem;
+    padding: 0.22rem 0.3rem;
+  }
+}
+
+/* Add Guest House Section - Professional Styling */
+.add-guesthouse-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 30px rgba(52, 152, 219, 0.15);
+  padding: 2.5rem;
+  margin: 0 auto 3rem auto;
+  max-width: 700px;
+  border: 1px solid rgba(52, 152, 219, 0.1);
+}
+
+.add-guesthouse-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eaf2f8;
+}
+
+.add-gh-icon {
+  color: #3498db;
+  font-size: 2.2rem;
+  background: #eaf6fd;
+  padding: 0.8rem;
+  border-radius: 50%;
+}
+
+.add-guesthouse-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.add-gh-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #34495e;
+}
+
+.form-field input,
+.form-field textarea {
+  padding: 0.85rem 1rem;
+  border: 1px solid #d4e6f1;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background-color: #f8fbfe;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+  background-color: #ffffff;
+}
+
+.form-field textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.add-gh-button {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.add-gh-button:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(52, 152, 219, 0.25);
+}
+
+.add-gh-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.error-msg {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background: #fdedec;
+  border-radius: 6px;
+  border-left: 3px solid #e74c3c;
+}
+
+.success-msg {
+  color: #27ae60;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  background: #e8f8f0;
+  border-radius: 6px;
+  border-left: 3px solid #27ae60;
+}
+
+/* Manage Guest Houses Section - Professional Styling */
+.manage-guesthouse-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 30px rgba(52, 152, 219, 0.15);
+  padding: 2.5rem;
+  margin: 0 auto 3rem auto;
+  max-width: 900px;
+  border: 1px solid rgba(52, 152, 219, 0.1);
+}
+
+.manage-guesthouse-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eaf2f8;
+}
+
+.manage-gh-icon {
+  color: #3498db;
+  font-size: 2.2rem;
+  background: #eaf6fd;
+  padding: 0.8rem;
+  border-radius: 50%;
+}
+
+.manage-guesthouse-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.guesthouse-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.guesthouse-row {
+  display: flex;
+  flex-wrap: wrap;
+  background: #f8fbfe;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.08);
+  padding: 1.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  transition: all 0.3s ease;
+  border: 1px solid #e3f2fd;
+}
+
+.guesthouse-row:hover {
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.12);
+  transform: translateY(-2px);
+}
+
+.guesthouse-row.editing {
+  background: #f0f7ff;
+  border: 1px solid #d4e6f1;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+}
+
+.gh-info {
+  flex: 3 1 300px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.gh-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 0.3rem;
+}
+
+.gh-location {
+  font-size: 0.95rem;
+  color: #3498db;
+  font-weight: 500;
+}
+
+.gh-description, .gh-contact {
+  font-size: 0.92rem;
+  color: #7f8c8d;
+  line-height: 1.5;
+}
+
+.gh-actions {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.gh-action-button {
+  background: #ffffff;
+  border: 1px solid #d4e6f1;
+  color: #3498db;
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 2px 6px rgba(52, 152, 219, 0.1);
+}
+
+.gh-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gh-edit:hover {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.gh-delete:hover {
+  background: #e74c3c;
+  color: white;
+  border-color: #e74c3c;
+}
+
+.gh-save:hover {
+  background: #27ae60;
+  color: white;
+  border-color: #27ae60;
+}
+
+.gh-cancel:hover {
+  background: #95a5a6;
+  color: white;
+  border-color: #95a5a6;
+}
+
+.gh-edit-input {
+  flex: 1;
+  min-width: 120px;
+  max-width: 200px;
+  background: #ffffff;
+  border: 1px solid #d4e6f1;
+  border-radius: 8px;
+  padding: 0.7rem;
+  font-size: 0.95rem;
+  margin-right: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.gh-edit-input:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.gh-row-error {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  grid-column: 1 / -1;
+  padding: 0.5rem;
+  background: #fdedec;
+  border-radius: 6px;
+}
+
+.gh-delete-spinner {
+  border: 2px solid rgba(231, 76, 60, 0.2);
+  border-top: 2px solid #e74c3c;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+.dashboard-loading, .dashboard-empty {
+  text-align: center;
+  padding: 2rem;
+  color: #7f8c8d;
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .add-guesthouse-card,
+  .manage-guesthouse-card {
+    padding: 1.8rem;
+    margin-bottom: 2rem;
+  }
+  
+  .gh-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .gh-edit-input {
+    min-width: 100%;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+  
+  .gh-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-guesthouse-card,
+  .manage-guesthouse-card {
+    padding: 1.5rem 1.2rem;
+    border-radius: 10px;
+  }
+  
+  .add-guesthouse-header,
+  .manage-guesthouse-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+  
+  .add-gh-icon,
+  .manage-gh-icon {
+    font-size: 1.8rem;
+    padding: 0.6rem;
+  }
+  
+  .guesthouse-row {
+    padding: 1.2rem;
+  }
+  
+  .gh-action-button {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+}
+
+/* Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Combined Guest House Management Section */
+.manage-guesthouse-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 30px rgba(52, 152, 219, 0.15);
+  padding: 2rem;
+  margin: 0 auto 3rem auto;
+  max-width: 1000px;
+  border: 1px solid rgba(52, 152, 219, 0.1);
+}
+
+.manage-guesthouse-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #eaf2f8;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.manage-gh-icon {
+  color: #3498db;
+  font-size: 1.8rem;
+}
+
+.add-gh-toggle-button {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.add-gh-toggle-button:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+}
+
+.add-gh-toggle-button .button-icon {
+  font-size: 1.1rem;
+}
+
+/* Add Guest House Form */
+.add-guesthouse-form {
+  background: #f8fbfe;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px dashed #d4e6f1;
+}
+
+.add-guesthouse-form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.add-guesthouse-form .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.add-guesthouse-form label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #34495e;
+}
+
+.add-guesthouse-form input,
+.add-guesthouse-form textarea {
+  padding: 0.8rem;
+  border: 1px solid #d4e6f1;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background-color: white;
+}
+
+.add-guesthouse-form input:focus,
+.add-guesthouse-form textarea:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.add-guesthouse-form textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.add-guesthouse-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.add-guesthouse-form .submit-button {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-guesthouse-form .submit-button:hover {
+  background: #219653;
+}
+
+.add-guesthouse-form .submit-button:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Rest of your existing styles... */

@@ -12,6 +12,7 @@ function BookRoom() {
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedBeds, setSelectedBeds] = useState(1);
   const [formData, setFormData] = useState({
     checkInDate: null,
     checkOutDate: null,
@@ -85,9 +86,12 @@ function BookRoom() {
 
     const bookingData = {
       roomId: room.id,
-      checkInDate: formData.checkInDate.toISOString().split('T')[0],
-      checkOutDate: formData.checkOutDate.toISOString().split('T')[0],
-      specialRequests: formData.specialRequests
+      // userName:user.username,
+      roomName: room.name,
+      checkInDate: formData.checkInDate.toLocaleDateString('en-CA'), // yyyy-mm-dd format
+      checkOutDate: formData.checkOutDate.toLocaleDateString('en-CA'),
+      specialRequests: formData.specialRequests,
+      bedCount: selectedBeds 
     };
 
     const response = await axios.post(
@@ -221,6 +225,22 @@ function BookRoom() {
               {validationErrors.checkOutDate && (
                 <p className="error-message">{validationErrors.checkOutDate}</p>
               )}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="bedCount">Number of Beds</label>
+              <select
+                id="bedCount"
+                value={selectedBeds}
+                onChange={(e) => setSelectedBeds(Number(e.target.value))}
+                required
+              >
+                {room && Array.from({ length: room.bedCount }, (_, i) => i + 1).map((count) => (
+                  <option key={count} value={count}>
+                    {count}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">

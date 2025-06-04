@@ -76,6 +76,8 @@ function Login() {
       <div className="auth-links">
         <Link to="/forgot-password">Forgot Password?</Link>
         <Link to="/register">Don't have an account? Register</Link>
+        {/* <Link to="/reset-password">reset</Link> */}
+
       </div>
     </div>
   );
