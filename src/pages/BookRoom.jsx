@@ -112,27 +112,25 @@ function BookRoom() {
       } 
     });
   } catch (err) {
-    console.error("Booking error:", err);
-    
-    // Handle missing token differently from other errors
-    if (err.message.includes("No authentication token")) {
-      // Redirect to login page with a return URL
-      navigate("/login", { 
-        state: { 
-          from: `/book-room/${id}`,
-          message: "Please log in to book a room" 
-        } 
-      });
-    } else {
-      // Show other errors to the user
-      setError(
-        err.response?.data?.message || 
-        "Failed to create booking. Please try again."
-      );
-    }
-  } finally {
-    setIsSubmitting(false);
+  console.error("Booking error:", err);
+
+  if (err.message.includes("No authentication token")) {
+    navigate("/login", { 
+      state: { 
+        from: `/book-room/${id}`,
+        message: "Please log in to book a room" 
+      } 
+    });
+  } else {
+    setError(
+      typeof err.response?.data === "string"
+        ? err.response.data
+        : err.response?.data?.message || "Failed to create booking. Please try again."
+    );
   }
+} finally {
+  setIsSubmitting(false);
+}
 };
 
   if (loading) {
@@ -154,11 +152,11 @@ function BookRoom() {
           <h3>Error Loading Room</h3>
           <p>{error}</p>
           <button 
-            onClick={() => window.location.reload()} 
-            className="retry-button"
-          >
-            Try Again
-          </button>
+  onClick={() => navigate(`/room-details/${id}`)} 
+  className="retry-button"
+>
+  Try Again
+</button>
         </div>
       </Layout>
     );

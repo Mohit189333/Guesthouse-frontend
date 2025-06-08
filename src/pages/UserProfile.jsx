@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../css/Profile.css';
 import Layout from '../components/Layout';
+import { toast, ToastContainer } from 'react-toastify';
 
 const UserProfile = () => {
   const [user, setUser] = useState({
@@ -69,7 +70,7 @@ const UserProfile = () => {
         }
       });
 
-      setMessage('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
       setIsEditing(false);
       fetchUserProfile();
     } catch (error) {
@@ -81,6 +82,17 @@ const UserProfile = () => {
   return (
     <Layout>
     <div className="profile-container">
+      <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+              />
       <h2>My Profile</h2>
       {message && <div className="alert">{message}</div>}
 

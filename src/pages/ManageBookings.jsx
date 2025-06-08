@@ -24,64 +24,45 @@ function ManageBookings() {
   const [actionLoadingId, setActionLoadingId] = useState(null); // booking id which is being processed
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchBookings = async () => {
+useEffect(() => {
+    let isMounted = true;
+    const fetchData = async () => {
+      setLoading(true);
+      setLogsLoading(true);
+      setError("");
+      setLogsError("");
       try {
         const token = localStorage.getItem("jwtToken");
-        const response = await axios.get(
-          "http://localhost:5050/api/bookings/pending",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setBookings(response.data);
-        setLoading(false);
+        // Fetch bookings and logs in parallel
+        const [bookingsRes, logsRes] = await Promise.all([
+          axios.get("http://localhost:5050/api/bookings/pending", {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get("http://localhost:5050/api/admin/booking-logs", {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+        if (!isMounted) return;
+        setBookings(bookingsRes.data);
+        setLogs(logsRes.data);
       } catch (err) {
+        if (!isMounted) return;
+        if (err.response?.status === 401) {
+          localStorage.removeItem("jwtToken");
+          navigate("/login");
+        }
+        // Use error messages for the appropriate section
         setError("Failed to fetch bookings. Please try again later.");
-        setLoading(false);
-        console.error("Fetch bookings error:", err);
-
-        if (err.response?.status === 401) {
-          localStorage.removeItem("jwtToken");
-          navigate("/login");
-        }
-      }
-    };
-
-    fetchBookings();
-  }, [navigate]);
-
-  // Fetch logs for all bookings (audit logs)
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const token = localStorage.getItem("jwtToken");
-        setLogsLoading(true);
-        const response = await axios.get(
-          "http://localhost:5050/api/admin/booking-logs",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        setLogs(response.data);
-        setLogsLoading(false);
-      } catch (err) {
         setLogsError("Failed to fetch booking logs. Please try again later.");
-        setLogsLoading(false);
-        console.error("Fetch booking logs error:", err);
-
-        if (err.response?.status === 401) {
-          localStorage.removeItem("jwtToken");
-          navigate("/login");
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+          setLogsLoading(false);
         }
       }
     };
-
-    fetchLogs();
+    fetchData();
+    return () => { isMounted = false; };
   }, [navigate]);
 
   const filteredBookings = bookings.filter((booking) => {

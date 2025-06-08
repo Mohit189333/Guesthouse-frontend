@@ -30,7 +30,7 @@ function Footer() {
               <>
                 <li><a href="/dashboard">Home</a></li>
                 <li><a href="/all-rooms">All Rooms</a></li>
-                <li><a href="/book-room">Book a Room</a></li>
+                <li><a href="/my-bookings">My Bookings</a></li>
                 <li><a href="/user-profile">User Profile</a></li>
               </>
             )}

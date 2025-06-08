@@ -16,6 +16,7 @@ const RoomCard = ({ room, checkInDate, checkOutDate }) => {
       <div className="room-details">
         <h3 className="room-name">{room.name}</h3>
         <p className="room-description">{room.description}</p>
+        <p>Bed = {room.bedCount}</p>
         <div className="room-amenities">
           {room.amenities.map((amenity, index) => (
             <span key={index} className="amenity-tag">{amenity}</span>

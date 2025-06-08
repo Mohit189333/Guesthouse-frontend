@@ -10,8 +10,10 @@ function Navbar() {
   const role = payload?.roles ? payload.roles[0] : null;
 
   const handleLogout = () => {
+    
     localStorage.removeItem("jwtToken");
     navigate("/login");
+    
   };
 
   const toggleMobileMenu = () => {

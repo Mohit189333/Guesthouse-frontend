@@ -4,60 +4,48 @@ import Layout from "../components/Layout";
 import "../css/Rooms.css";
 import { useNavigate } from "react-router-dom";
 
-
 function AllRooms() {
-  const [rooms, setRooms]               = useState([]);
-  const [guestHouses, setGuestHouses]   = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState("");
-  const [searchTerm, setSearchTerm]     = useState("");
-  const [filter, setFilter]             = useState("all");
+  const [rooms, setRooms] = useState([]);
+  const [guestHouses, setGuestHouses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filter, setFilter] = useState("all");
   const [selectedGuestHouse, setSelectedGuestHouse] = useState("all");
   const navigate = useNavigate();
 
-  /* ------------------------------------------------------------------ */
-  /* 1️⃣  GET THE LIST OF GUEST-HOUSES ONCE WHEN THE COMPONENT MOUNTS   */
-  /* ------------------------------------------------------------------ */
   useEffect(() => {
-    const loadGuestHouses = async () => {
-      try {
-        const res = await axios.get("http://localhost:5050/api/guest-houses");
-        setGuestHouses(res.data);
-      } catch (err) {
-        setError("Failed to load guest-houses.");
-      }
-    };
-    loadGuestHouses();
-  }, []);
+    let isMounted = true;
+    const fetchData = async () => {
+      setLoading(true);
+      setError("");
 
-  /* ------------------------------------------------------------------ */
-  /* 2️⃣  GET ROOMS EVERY TIME THE SELECTED GUEST-HOUSE CHANGES          */
-  /*     (INCLUDING THE FIRST RENDER, WHEN IT IS "all")                 */
-  /* ------------------------------------------------------------------ */
-  useEffect(() => {
-    const loadRooms = async () => {
       try {
-        setLoading(true);
-        const url =
+        // Fetch guest houses
+        const guestHouseRes = await axios.get("http://localhost:5050/api/guest-houses");
+        if (!isMounted) return;
+        setGuestHouses(guestHouseRes.data);
+
+        // Fetch rooms based on selected guest house
+        const roomsUrl =
           selectedGuestHouse === "all"
             ? "http://localhost:5050/api/rooms/available"
             : `http://localhost:5050/api/guest-houses/${selectedGuestHouse}/rooms`;
-
-        const res = await axios.get(url);
-        setRooms(res.data);
-        setError("");
+        const roomsRes = await axios.get(roomsUrl);
+        if (!isMounted) return;
+        setRooms(roomsRes.data);
       } catch (err) {
-        setError("Failed to load rooms. Please try again later.");
+        if (!isMounted) return;
+        setError("Failed to load data. Please try again later.");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
-    loadRooms();
+
+    fetchData();
+    return () => { isMounted = false; };
   }, [selectedGuestHouse]);
 
-  /* ------------------------------------------------------------------ */
-  /* 3️⃣  HANDLERS & FILTERING                                          */
-  /* ------------------------------------------------------------------ */
   const handleGuestHouseChange = (e) => {
     setSelectedGuestHouse(e.target.value);
   };
@@ -72,9 +60,6 @@ function AllRooms() {
     return matchesSearch && matchesFilter;
   });
 
-  /* ------------------------------------------------------------------ */
-  /* 4️⃣  RENDER                                                        */
-  /* ------------------------------------------------------------------ */
   if (loading) {
     return (
       <Layout>
@@ -92,7 +77,10 @@ function AllRooms() {
         <div className="error-container">
           <div className="error-icon">⚠️</div>
           <p>{error}</p>
-          <button onClick={() => window.location.reload()} className="retry-button">
+          <button
+            onClick={() => window.location.reload()}
+            className="retry-button"
+          >
             Retry
           </button>
         </div>
@@ -105,7 +93,9 @@ function AllRooms() {
       {/* ——— header, search & filter controls ——— */}
       <div className="rooms-header">
         <h1>Available Rooms</h1>
-        <p className="subtitle">Find your perfect accommodation for your stay</p>
+        <p className="subtitle">
+          Find your perfect accommodation for your stay
+        </p>
 
         <div className="search-filter-container">
           {/* search box */}
@@ -121,7 +111,10 @@ function AllRooms() {
 
           {/* location dropdown */}
           <div className="filter-dropdown">
-            <select value={selectedGuestHouse} onChange={handleGuestHouseChange}>
+            <select
+              value={selectedGuestHouse}
+              onChange={handleGuestHouseChange}
+            >
               <option value="all">All Locations</option>
               {guestHouses.map((gh) => (
                 <option key={gh.id} value={gh.id}>
@@ -175,6 +168,7 @@ function AllRooms() {
 
               <div className="room-content">
                 <h3>{room.name}</h3>
+
                 <p className="room-location">
                   {guestHouses.find((gh) => gh.id === room.guestHouseId)?.name}
                 </p>
@@ -190,12 +184,11 @@ function AllRooms() {
                     <span className="price-label">/ night</span>
                   </div>
                   <button
-  className="view-details-button"
-  onClick={() => navigate(`/room-details/${room.id}`)}
->
-  View Details
-</button>
-
+                    className="view-details-button"
+                    onClick={() => navigate(`/room-details/${room.id}`)}
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             </div>
