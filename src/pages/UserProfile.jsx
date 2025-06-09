@@ -4,6 +4,7 @@ import axios from 'axios';
 import '../css/Profile.css';
 import Layout from '../components/Layout';
 import { toast, ToastContainer } from 'react-toastify';
+import { userProfileSchema } from '../validation/validationSchema';
 
 const UserProfile = () => {
   const [user, setUser] = useState({
@@ -22,7 +23,6 @@ const UserProfile = () => {
       navigate('/login');
       return;
     }
-
     fetchUserProfile();
   }, []);
 
@@ -39,8 +39,10 @@ const UserProfile = () => {
         confirmPassword: ''
       });
     } catch (error) {
-      console.error('Error fetching profile:', error);
-      setMessage('Failed to fetch profile data');
+      toast.error('Please log in again');
+      setTimeout(() => {
+        navigate('/login');
+      }, 5000);
     }
   };
 
@@ -51,9 +53,16 @@ const UserProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (user.password && user.password !== user.confirmPassword) {
-      setMessage('Passwords do not match');
+
+    // Zod validation
+    const parseUser = {
+      ...user,
+      password: user.password || "",
+      confirmPassword: user.confirmPassword || ""
+    };
+    const validation = userProfileSchema.safeParse(parseUser);
+    if (!validation.success) {
+      setMessage(validation.error.errors[0].message);
       return;
     }
 
@@ -73,8 +82,8 @@ const UserProfile = () => {
       toast.success('Profile updated successfully!');
       setIsEditing(false);
       fetchUserProfile();
+      setMessage('');
     } catch (error) {
-      console.error('Error updating profile:', error);
       setMessage(error.response?.data?.message || 'Failed to update profile');
     }
   };

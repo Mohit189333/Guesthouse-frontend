@@ -1,7 +1,22 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FiLock, FiCheckCircle, FiArrowRight } from "react-icons/fi";
-// import logo from "../assets/logo.svg"; // Replace with your actual logo
+
+function validatePassword(password) {
+  if (password.length < 8) {
+    return "Password must be at least 8 characters.";
+  }
+  if (!/[A-Z]/.test(password)) {
+    return "Password must include at least one uppercase letter.";
+  }
+  if (!/[0-9]/.test(password)) {
+    return "Password must include at least one number.";
+  }
+  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+    return "Password must include at least one special character.";
+  }
+  return "";
+}
 
 function ResetPassword() {
   const { token } = useParams();
@@ -14,16 +29,17 @@ function ResetPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate passwords match
-    if (password !== confirmPassword) {
-      setMessage({ text: "Passwords do not match", type: "error" });
+
+    // Validate password strength
+    const pwdError = validatePassword(password);
+    if (pwdError) {
+      setMessage({ text: pwdError, type: "error" });
       return;
     }
 
-    // Validate password strength (basic example)
-    if (password.length < 8) {
-      setMessage({ text: "Password must be at least 8 characters", type: "error" });
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setMessage({ text: "Passwords do not match.", type: "error" });
       return;
     }
 
@@ -36,27 +52,26 @@ function ResetPassword() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password }),
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
-        setMessage({ 
-          text: "Password reset successfully! Redirecting to login...", 
-          type: "success" 
+        setMessage({
+          text: "Password reset successfully! Redirecting to login...",
+          type: "success"
         });
         setSuccess(true);
-        // Redirect to login after 3 seconds
         setTimeout(() => navigate("/login"), 3000);
       } else {
-        setMessage({ 
-          text: data.message || "Error resetting password. Please try again.", 
-          type: "error" 
+        setMessage({
+          text: data.message || "Error resetting password. Please try again.",
+          type: "error"
         });
       }
     } catch (error) {
-      setMessage({ 
-        text: "Network error. Please check your connection and try again.", 
-        type: "error" 
+      setMessage({
+        text: "Network error. Please check your connection and try again.",
+        type: "error"
       });
       console.error("Reset password error:", error);
     } finally {
@@ -68,7 +83,6 @@ function ResetPassword() {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          {/* <img src={logo} alt="Company Logo" className="auth-logo" /> */}
           <h2>Reset Your Password</h2>
           <p>Create a new secure password for your account</p>
         </div>
@@ -84,7 +98,7 @@ function ResetPassword() {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
+                  placeholder="At least 8 characters, 1 uppercase, 1 number, 1 special char"
                   required
                   minLength="8"
                   autoFocus
@@ -114,8 +128,8 @@ function ResetPassword() {
               </div>
             )}
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn-primary"
               disabled={isSubmitting}
             >

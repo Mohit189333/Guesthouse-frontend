@@ -168,7 +168,6 @@ function AllRooms() {
 
               <div className="room-content">
                 <h3>{room.name}</h3>
-
                 <p className="room-location">
                   {guestHouses.find((gh) => gh.id === room.guestHouseId)?.name}
                 </p>

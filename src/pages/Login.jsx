@@ -34,7 +34,7 @@ function Login() {
         password: formData.password,
       });
 
-      const token = response.data;
+      const token = response.data.token;
       localStorage.setItem("jwtToken", token);
 
       const payload = JSON.parse(atob(token.split(".")[1]));

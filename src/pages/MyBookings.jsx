@@ -6,10 +6,12 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FiCalendar, FiFilter, FiX, FiArrowRight, FiInfo } from "react-icons/fi";
 import "../css/MyBookings.css";
+import Loader from "../components/Loader"; // <-- Import Loader
 
 function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showLoader, setShowLoader] = useState(false); // <-- Add this
   const [error, setError] = useState("");
   const [filterStatus, setFilterStatus] = useState("ALL");
   const [dateRange, setDateRange] = useState([null, null]);
@@ -67,6 +69,8 @@ function MyBookings() {
   const handleCancelBooking = async (bookingId) => {
     if (!window.confirm("Are you sure you want to cancel this booking?")) return;
 
+    setShowLoader(true); // <-- Show the loader
+
     try {
       const token = localStorage.getItem("jwtToken");
       await axios.delete(`http://localhost:5050/api/bookings/${bookingId}`, {
@@ -91,6 +95,8 @@ function MyBookings() {
           : "Failed to cancel booking. Please try again.");
       
       alert(errorMessage);
+    } finally {
+      setShowLoader(false); // <-- Hide the loader
     }
   };
 
@@ -185,7 +191,6 @@ function MyBookings() {
                   className="date-range-picker"
                   calendarClassName="booking-calendar"
                 />
-                {/* <FiCalendar className="calendar-icon" /> */}
                 {startDate && (
                   <button 
                     onClick={() => setDateRange([null, null])}
@@ -274,6 +279,7 @@ function MyBookings() {
           </div>
         )}
       </div>
+      {showLoader && <Loader />} {/* Fullscreen loader overlays everything */}
     </Layout>
   );
 }

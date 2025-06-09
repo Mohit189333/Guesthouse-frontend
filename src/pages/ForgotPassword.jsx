@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { FiMail, FiArrowRight } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
+function validateEmail(email) {
+  // Simple email regex
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -10,17 +15,27 @@ function ForgotPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+
+    if (!email) {
+      setMessage("Email address is required.");
+      return;
+    }
+    if (!validateEmail(email)) {
+      setMessage("Please enter a valid email address.");
+      return;
+    }
+
     setIsSubmitting(true);
-    
+
     try {
       const response = await fetch("http://localhost:5050/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         setMessage("Password reset link has been sent to your email address.");
       } else {
@@ -38,8 +53,6 @@ function ForgotPassword() {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          {/* <img src={logo} alt="Company Logo" className="auth-logo" /> */}
-          {/* <h1><b>Guest House Booking System</b></h1> */}
           <h2>Forgot Password</h2>
           <p>Enter your email to receive a password reset link</p>
         </div>
@@ -61,8 +74,8 @@ function ForgotPassword() {
             </div>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn-primary"
             disabled={isSubmitting}
           >

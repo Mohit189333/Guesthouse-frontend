@@ -49,12 +49,10 @@ function Dashboard() {
   const [editError, setEditError] = useState("");
   const [deleteLoadingId, setDeleteLoadingId] = useState(null);
 
-const [userBookings, setUserBookings] = useState([]);
-const [bookingsLoading, setBookingsLoading] = useState(false);
-const [bookingsError, setBookingsError] = useState("");
+  const [userBookings, setUserBookings] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [bookingsError, setBookingsError] = useState("");
 
-
-  
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
     if (!token) {
@@ -72,66 +70,66 @@ const [bookingsError, setBookingsError] = useState("");
     }
   }, [navigate]);
 
-
   useEffect(() => {
-  if (role === "USER") {
-    fetchUserBookings();
-  }
-}, [role]);
+    if (role === "USER") {
+      fetchUserBookings();
+    }
+  }, [role]);
 
-const fetchUserBookings = async () => {
-  setBookingsLoading(true);
-  setBookingsError("");
-  try {
-    const token = localStorage.getItem("jwtToken");
-    const response = await axios.get("http://localhost:5050/api/bookings/my", {
-      headers: { Authorization: `Bearer ${token}` }
+  const fetchUserBookings = async () => {
+    setBookingsLoading(true);
+    setBookingsError("");
+    try {
+      const token = localStorage.getItem("jwtToken");
+      const response = await axios.get("http://localhost:5050/api/bookings/my", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUserBookings(response.data);
+    } catch (err) {
+      setBookingsError("Failed to load your bookings.");
+      console.error("Error fetching bookings:", err);
+    } finally {
+      setBookingsLoading(false);
+    }
+  };
+
+  // Helper functions to calculate the stats
+  const getUpcomingBookings = () => {
+    const today = new Date();
+    return userBookings.filter(booking => {
+      const checkInDate = new Date(booking.checkInDate);
+      return (
+        (booking.status === "APPROVED" || booking.status === "PENDING") && 
+        checkInDate >= today
+      );
     });
-    setUserBookings(response.data);
-  } catch (err) {
-    setBookingsError("Failed to load your bookings.");
-    console.error("Error fetching bookings:", err);
-  } finally {
-    setBookingsLoading(false);
-  }
-};
+  };
 
-// Helper functions to calculate the stats
-const getUpcomingBookings = () => {
-  const today = new Date();
-  return userBookings.filter(booking => {
-    const checkInDate = new Date(booking.checkInDate);
-    return (
-      (booking.status === "APPROVED" || booking.status === "PENDING") && 
-      checkInDate >= today
-    );
-  });
-};
+  const getCompletedStays = () => {
+    const today = new Date();
+    return userBookings.filter(booking => {
+      const checkOutDate = new Date(booking.checkOutDate);
+      return (
+        booking.status === "APPROVED" && 
+        checkOutDate < today
+      );
+    });
+  };
 
-const getCompletedStays = () => {
-  const today = new Date();
-  return userBookings.filter(booking => {
-    const checkOutDate = new Date(booking.checkOutDate);
-    return (
-      booking.status === "APPROVED" && 
-      checkOutDate < today
-    );
-  });
-};
+  const getNextBookingDate = () => {
+    const upcoming = getUpcomingBookings();
+    if (upcoming.length === 0) return null;
+    
+    // Sort by check-in date ascending
+    upcoming.sort((a, b) => new Date(a.checkInDate) - new Date(b.checkInDate));
+    return new Date(upcoming[0].checkInDate);
+  };
 
-const getNextBookingDate = () => {
-  const upcoming = getUpcomingBookings();
-  if (upcoming.length === 0) return null;
-  
-  // Sort by check-in date ascending
-  upcoming.sort((a, b) => new Date(a.checkInDate) - new Date(b.checkInDate));
-  return new Date(upcoming[0].checkInDate);
-};
+  // Format date for display
+  const formatShortDate = (date) => {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
 
-// Format date for display
-const formatShortDate = (date) => {
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-};
   // Load guest houses for admin
   useEffect(() => {
     if (role === "ADMIN") {
@@ -498,6 +496,26 @@ const formatShortDate = (date) => {
                 </div>
               )}
             </div>
+            {/* Admin Quick Actions */}
+            <div className="quick-actions">
+                <h3 className="section-title">Quick Actions</h3>
+                <div className="action-buttons">
+                  <button
+                    className="action-button"
+                    onClick={() => navigate("/manage-rooms")}
+                  >
+                    <FiHome className="button-icon" />
+                    Manage Rooms
+                  </button>
+                  <button
+                    className="action-button"
+                    onClick={() => navigate("/manage-bookings")}
+                  >
+                    <FiBookmark className="button-icon" />
+                    View Bookings
+                  </button>
+                </div>
+              </div>
           </>
         ) : (
           <>
@@ -594,31 +612,36 @@ const formatShortDate = (date) => {
         <div className="dashboard-content">
           {role === "ADMIN" ? (
             <div className="admin-dashboard">
-              <h2 className="section-title">Management Overview</h2>
+              {/* Management Overview removed - only quick actions retained */}
+            </div>
+          ) : (
+            <div className="user-dashboard">
+              <h2 className="section-title">Your Stay Overview</h2>
               <div className="dashboard-stats">
                 <div className="stat-card">
                   <div className="stat-icon">
-                    <FiHome />
+                    <FiClock />
                   </div>
-                  <h3>Rooms</h3>
-                  <p>25 Total Rooms</p>
-                  <span className="stat-trend">+2 this month</span>
+                  <h3>Upcoming</h3>
+                  <p>{bookingsLoading ? "..." : getUpcomingBookings().length} Booking{getUpcomingBookings().length !== 1 ? "s" : ""}</p>
+                  {!bookingsLoading && getUpcomingBookings().length > 0 && (
+                    <span className="stat-trend">
+                      Next: {formatShortDate(getNextBookingDate())}
+                    </span>
+                  )}
+                  {!bookingsLoading && getUpcomingBookings().length === 0 && (
+                    <span className="stat-trend">No upcoming stays</span>
+                  )}
                 </div>
                 <div className="stat-card">
                   <div className="stat-icon">
                     <FiBookmark />
                   </div>
-                  <h3>Bookings</h3>
-                  <p>15 Active</p>
-                  <span className="stat-trend">78% occupancy</span>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-icon">
-                    <FiDollarSign />
-                  </div>
-                  <h3>Revenue</h3>
-                  <p>$12,500</p>
-                  <span className="stat-trend">This month</span>
+                  <h3>Total Stays</h3>
+                  <p>{bookingsLoading ? "..." : getCompletedStays().length} Completed</p>
+                  <span className="stat-trend">
+                    {bookingsLoading ? "" : `Since ${new Date().getFullYear()}`}
+                  </span>
                 </div>
               </div>
               <div className="quick-actions">
@@ -626,71 +649,21 @@ const formatShortDate = (date) => {
                 <div className="action-buttons">
                   <button
                     className="action-button"
-                    onClick={() => navigate("/manage-rooms")}
+                    onClick={() => navigate("/all-rooms")}
                   >
                     <FiHome className="button-icon" />
-                    Manage Rooms
+                    Browse Rooms
                   </button>
                   <button
                     className="action-button"
-                    onClick={() => navigate("/manage-bookings")}
+                    onClick={() => navigate("/my-bookings")}
                   >
-                    <FiBookmark className="button-icon" />
+                    <FiPlusCircle className="button-icon" />
                     View Bookings
                   </button>
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="user-dashboard">
-  <h2 className="section-title">Your Stay Overview</h2>
-  <div className="dashboard-stats">
-    <div className="stat-card">
-      <div className="stat-icon">
-        <FiClock />
-      </div>
-      <h3>Upcoming</h3>
-      <p>{bookingsLoading ? "..." : getUpcomingBookings().length} Booking{getUpcomingBookings().length !== 1 ? "s" : ""}</p>
-      {!bookingsLoading && getUpcomingBookings().length > 0 && (
-        <span className="stat-trend">
-          Next: {formatShortDate(getNextBookingDate())}
-        </span>
-      )}
-      {!bookingsLoading && getUpcomingBookings().length === 0 && (
-        <span className="stat-trend">No upcoming stays</span>
-      )}
-    </div>
-    <div className="stat-card">
-      <div className="stat-icon">
-        <FiBookmark />
-      </div>
-      <h3>Total Stays</h3>
-      <p>{bookingsLoading ? "..." : getCompletedStays().length} Completed</p>
-      <span className="stat-trend">
-        {bookingsLoading ? "" : `Since ${new Date().getFullYear()}`}
-      </span>
-    </div>
-  </div>
-  <div className="quick-actions">
-    <h3 className="section-title">Quick Actions</h3>
-    <div className="action-buttons">
-      <button
-        className="action-button"
-        onClick={() => navigate("/all-rooms")}
-      >
-        <FiHome className="button-icon" />
-        Browse Rooms
-      </button>
-      <button
-        className="action-button"
-        onClick={() => navigate("/book-room")}
-      >
-        <FiPlusCircle className="button-icon" />
-        New Booking
-      </button>
-    </div>
-  </div>
-</div>
           )}
         </div>
       </div>

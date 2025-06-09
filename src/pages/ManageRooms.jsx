@@ -4,7 +4,7 @@ import axios from "axios";
 import Layout from "../components/Layout";
 import "../css/ManageRooms.css";
 import { ToastContainer, toast } from 'react-toastify';
-
+import { roomSchema } from '../validation/roomSchema'; // <-- import schema
 
 function ManageRooms() {
   const [rooms, setRooms] = useState([]);
@@ -24,6 +24,7 @@ function ManageRooms() {
   });
   const [imageFile, setImageFile] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
   const navigate = useNavigate();
 
   // Load Guest Houses on mount
@@ -35,7 +36,6 @@ function ManageRooms() {
   useEffect(() => {
     if (selectedGuestHouse) {
       fetchRooms(selectedGuestHouse);
-      // Update the newRoom guestHouseId when the main selector changes
       setNewRoom(prev => ({ ...prev, guestHouseId: selectedGuestHouse }));
     } else {
       setRooms([]);
@@ -82,22 +82,52 @@ function ManageRooms() {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setNewRoom((prevRoom) => ({
       ...prevRoom,
-      [name]: value,
+      [name]: type === "number" ? Number(value) : value,
     }));
+    // Clear error for this field
+    setFormErrors(prev => ({ ...prev, [name]: undefined }));
   };
 
   const handleGuestHouseChange = (e) => {
     const selectedId = e.target.value;
     setSelectedGuestHouse(selectedId);
-    // Also update the newRoom guestHouseId when the main selector changes
     setNewRoom(prev => ({ ...prev, guestHouseId: selectedId }));
+    setFormErrors(prev => ({ ...prev, guestHouseId: undefined }));
+  };
+
+  // Validate room form fields using zod
+  const validateRoomForm = () => {
+    // Convert price and bedCount to numbers for validation
+    const validationRoom = {
+      ...newRoom,
+      pricePerNight: Number(newRoom.pricePerNight),
+      bedCount: Number(newRoom.bedCount),
+      isAvailable: newRoom.isAvailable === true || newRoom.isAvailable === "true"
+    };
+    const result = roomSchema.safeParse(validationRoom);
+    if (!result.success) {
+      const errors = {};
+      result.error.errors.forEach(err => {
+        errors[err.path[0]] = err.message;
+      });
+      setFormErrors(errors);
+      return false;
+    }
+    setFormErrors({});
+    return true;
   };
 
   const handleAddRoom = async (e) => {
     e.preventDefault();
+    // Validate form with zod
+    if (!validateRoomForm()) {
+      toast.error("Please fix validation errors in the form.", "error");
+      return;
+    }
+
     if (!newRoom.guestHouseId) {
       toast.error("Please select a guest house for this room.", "error");
       return;
@@ -154,6 +184,7 @@ function ManageRooms() {
     });
     setImageFile(null);
     setIsFormOpen(false);
+    setFormErrors({});
   };
 
   return (
@@ -198,7 +229,7 @@ function ManageRooms() {
                   )}
                   {guestHouses.map((gh) => (
                     <option key={gh.id} value={gh.id}>
-                      {gh.location} {/*– {gh.name}*/}
+                      {gh.location}
                     </option>
                   ))}
                 </select>
@@ -223,6 +254,7 @@ function ManageRooms() {
                         value={newRoom.guestHouseId}
                         onChange={handleInputChange}
                         required
+                        className={formErrors.guestHouseId ? "error" : ""}
                       >
                         <option value="">Select Guest House</option>
                         {guestHouses.map((gh) => (
@@ -231,6 +263,9 @@ function ManageRooms() {
                           </option>
                         ))}
                       </select>
+                      {formErrors.guestHouseId && (
+                        <p className="error-message">{formErrors.guestHouseId}</p>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>Room Name</label>
@@ -241,7 +276,11 @@ function ManageRooms() {
                         onChange={handleInputChange}
                         required
                         placeholder="Deluxe Suite"
+                        className={formErrors.name ? "error" : ""}
                       />
+                      {formErrors.name && (
+                        <p className="error-message">{formErrors.name}</p>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>Room Type</label>
@@ -250,6 +289,7 @@ function ManageRooms() {
                         value={newRoom.roomType}
                         onChange={handleInputChange}
                         required
+                        className={formErrors.roomType ? "error" : ""}
                       >
                         <option value="">Select Type</option>
                         <option value="Standard">Standard</option>
@@ -257,6 +297,9 @@ function ManageRooms() {
                         <option value="Suite">Suite</option>
                         <option value="Deluxe">Deluxe</option>
                       </select>
+                      {formErrors.roomType && (
+                        <p className="error-message">{formErrors.roomType}</p>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>Price Per Night ($)</label>
@@ -268,7 +311,11 @@ function ManageRooms() {
                         required
                         min="0"
                         step="0.01"
+                        className={formErrors.pricePerNight ? "error" : ""}
                       />
+                      {formErrors.pricePerNight && (
+                        <p className="error-message">{formErrors.pricePerNight}</p>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>Bed Count</label>
@@ -280,13 +327,17 @@ function ManageRooms() {
                         required
                         min="1"
                         max="10"
+                        className={formErrors.bedCount ? "error" : ""}
                       />
+                      {formErrors.bedCount && (
+                        <p className="error-message">{formErrors.bedCount}</p>
+                      )}
                     </div>
                     <div className="form-group">
                       <label>Available</label>
                       <select
                         name="isAvailable"
-                        value={newRoom.isAvailable}
+                        value={String(newRoom.isAvailable)}
                         onChange={(e) =>
                           setNewRoom((prevRoom) => ({
                             ...prevRoom,
@@ -314,7 +365,11 @@ function ManageRooms() {
                         onChange={handleInputChange}
                         required
                         rows="3"
+                        className={formErrors.description ? "error" : ""}
                       />
+                      {formErrors.description && (
+                        <p className="error-message">{formErrors.description}</p>
+                      )}
                     </div>
                     <div className="form-group full-width">
                       <label>Amenities (comma separated)</label>
@@ -325,7 +380,11 @@ function ManageRooms() {
                         required
                         rows="2"
                         placeholder="WiFi, TV, Air Conditioning, etc."
+                        className={formErrors.amenities ? "error" : ""}
                       />
+                      {formErrors.amenities && (
+                        <p className="error-message">{formErrors.amenities}</p>
+                      )}
                     </div>
                   </div>
                   <div className="form-actions">

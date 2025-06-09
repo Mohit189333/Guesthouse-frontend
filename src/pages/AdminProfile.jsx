@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../css/Profile.css';
 import Layout from '../components/Layout';
+import { adminProfileSchema } from '../validation/validationSchema';
 
 const AdminProfile = () => {
   const [admin, setAdmin] = useState({
@@ -16,6 +17,7 @@ const AdminProfile = () => {
   const [users, setUsers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
+  const [message, setMessage] = useState('');
   const navigate = useNavigate();
   const token = localStorage.getItem('jwtToken');
 
@@ -24,7 +26,6 @@ const AdminProfile = () => {
       navigate('/login');
       return;
     }
-
     fetchAdminProfile();
   }, []);
 
@@ -41,8 +42,10 @@ const AdminProfile = () => {
         confirmPassword: ''
       });
     } catch (error) {
-      console.error('Error fetching admin profile:', error);
-      toast.error('Failed to fetch admin profile');
+      toast.error('Please log in again');
+      setTimeout(() => {
+        navigate('/login');
+      }, 5000);
     }
   };
 
@@ -55,7 +58,6 @@ const AdminProfile = () => {
       });
       setUsers(response.data);
     } catch (error) {
-      console.error('Error fetching users:', error);
       toast.error('Failed to fetch users');
     }
   };
@@ -67,9 +69,16 @@ const AdminProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (admin.password && admin.password !== admin.confirmPassword) {
-      toast.error('Passwords do not match');
+
+    // Zod validation
+    const parseAdmin = {
+      ...admin,
+      password: admin.password || "",
+      confirmPassword: admin.confirmPassword || ""
+    };
+    const validation = adminProfileSchema.safeParse(parseAdmin);
+    if (!validation.success) {
+      setMessage(validation.error.errors[0].message);
       return;
     }
 
@@ -89,9 +98,10 @@ const AdminProfile = () => {
       toast.success('Profile updated successfully!');
       setIsEditing(false);
       fetchAdminProfile();
+      setMessage('');
     } catch (error) {
-      console.error('Error updating profile:', error);
       toast.error(error.response?.data?.message || 'Failed to update profile');
+      setMessage(error.response?.data?.message || 'Failed to update profile');
     }
   };
 
@@ -106,7 +116,6 @@ const AdminProfile = () => {
         toast.success('User deleted successfully');
         fetchAllUsers();
       } catch (error) {
-        console.error('Error deleting user:', error);
         toast.error('Failed to delete user');
       }
     }
@@ -188,6 +197,7 @@ const AdminProfile = () => {
                     Cancel
                   </button>
                 </div>
+                {message && <div className="alert">{message}</div>}
               </form>
             )}
           </div>
